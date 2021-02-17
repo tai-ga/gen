@@ -3,10 +3,19 @@ package main
 import (
 	"fmt"
 	"os"
+	"runtime"
+	"strconv"
+	"strings"
 	"text/template"
 
 	"github.com/clipperhouse/typewriter"
 )
+
+func goVersion() float64 {
+	split := strings.Split(strings.Replace(runtime.Version(), "go", "", 1), ".")
+	version, _ := strconv.ParseFloat(fmt.Sprintf("%s.%s", split[0], split[1]), 64)
+	return version
+}
 
 func run(c config) error {
 	imports := typewriter.NewImportSpecSet(
@@ -15,6 +24,10 @@ func run(c config) error {
 		typewriter.ImportSpec{Path: "regexp"},
 		typewriter.ImportSpec{Path: "github.com/clipperhouse/typewriter"},
 	)
+
+	if goVersion() > 1.15 {
+		imports.Add(typewriter.ImportSpec{Path: "io/fs"})
+	}
 
 	return execute(runStandard, c, imports, runTmpl)
 }
